@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1A2744">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Duerme Mejor">
+  <link rel="manifest" href="manifest.json">
+  <title>Duerme Mejor en 21 Noches</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+      --navy: #1A2744;
+      --blue-mid: #243661;
+      --cream: #F5F0E8;
+      --gold: #C9A96E;
+      --muted: #7B8EA6;
+      --white: #FAFAFA;
+      --card: #1E2C50;
+      --border: rgba(201,169,110,0.2);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      position: relative;
+      min-height: 100%;
+    }
+
+    /* ---- Stars ---- */
+    #stars {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 100vh; pointer-events: none; z-index: 0; overflow: hidden;
+    }
+    .star {
+      position: absolute; background: rgba(201,169,110,0.4);
+      border-radius: 50%; animation: twinkle var(--d) ease-in-out infinite alternate;
+    }
+    @keyframes twinkle { from { opacity: 0.2; } to { opacity: 0.9; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      .star { animation: none !important; opacity: 0.5; }
+      * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+    }
+
+    /* (App shell handled by .app-wrapper flex layout) */
+
+    /* ---- App Header ---- */
+    .app-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--navy);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .app-header-left { display: flex; align-items: center; gap: 10px; }
+    .app-header svg { fill: var(--gold); width: 26px; height: 26px; }
+    .app-header-title {
+      font-family: 'Lora', Georgia, serif; font-size: 15px;
+      color: var(--cream); letter-spacing: 0.4px;
+    }
+    .reset-btn {
+      background: none; border: none; color: var(--muted);
+      font-size: 11px; cursor: pointer; padding: 6px 8px;
+    }
+
+    /* ---- Screens ---- */
+    .screen { padding: 20px; display: none; }
+    .screen.active { display: block; }
+
+    /* ---- Home Screen ---- */
+    .greeting-sub { font-size: 13px; color: var(--muted); letter-spacing: 0.5px; }
+    .greeting-main {
+      font-family: 'Lora', Georgia, serif; font-size: 26px;
+      color: var(--cream); margin-top: 4px; line-height: 1.3;
+    }
+
+    .progress-bar-wrapper { margin: 22px 0; }
+    .progress-row {
+      display: flex; justify-content: space-between;
+      font-size: 13px; margin-bottom: 8px;
+      color: var(--muted);
+    }
+    .progress-row span:last-child { color: var(--gold); font-weight: 600; }
+    .progress-bar {
+      height: 5px; background: var(--blue-mid);
+      border-radius: 3px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), #E8C584);
+      border-radius: 3px; transition: width 0.4s ease;
+    }
+
+    .current-night-card {
+      background: linear-gradient(135deg, var(--blue-mid) 0%, #2A3D72 100%);
+      border: 1px solid var(--gold);
+      border-radius: 18px; padding: 22px;
+      cursor: pointer;
+      box-shadow: 0 0 30px rgba(201,169,110,0.12);
+      transition: transform 0.2s;
+    }
+    .current-night-card:active { transform: scale(0.985); }
+    .cnc-label {
+      font-size: 11px; color: var(--gold);
+      text-transform: uppercase; letter-spacing: 1.8px; margin-bottom: 6px;
+    }
+    .cnc-night-num {
+      font-family: 'Lora', Georgia, serif; font-size: 52px;
+      color: var(--gold); opacity: 0.25; line-height: 1; margin-bottom: 2px;
+    }
+    .cnc-title {
+      font-family: 'Lora', Georgia, serif; font-size: 21px;
+      color: var(--cream); line-height: 1.3; margin-bottom: 14px;
+    }
+    .cnc-meta { display: flex; gap: 14px; margin-bottom: 18px; }
+    .cnc-meta span {
+      font-size: 12px; color: var(--muted);
+      display: flex; align-items: center; gap: 5px;
+    }
+    .btn-gold {
+      background: var(--gold); color: var(--navy);
+      border: none; border-radius: 10px;
+      padding: 12px 22px; font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn-gold:active { opacity: 0.88; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin: 20px 0; }
+    .stat-box {
+      background: var(--card); border-radius: 12px;
+      padding: 14px 10px; text-align: center;
+    }
+    .stat-box-num { font-family: 'Lora', Georgia, serif; font-size: 26px; color: var(--gold); }
+    .stat-box-label { font-size: 10px; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* ---- Programa Screen ---- */
+    .screen-title {
+      font-family: 'Lora', Georgia, serif; font-size: 22px;
+      color: var(--cream); margin-bottom: 18px;
+    }
+
+    .night-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 16px;
+      background: var(--card);
+      border-radius: 12px; margin-bottom: 8px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .night-row.is-current { border-color: var(--gold); background: var(--blue-mid); }
+    .night-row.is-locked { opacity: 0.45; cursor: default; }
+    .night-row:active:not(.is-locked) { background: var(--blue-mid); }
+
+    .nr-badge {
+      width: 42px; height: 42px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Lora', Georgia, serif; font-size: 15px;
+      background: var(--blue-mid); color: var(--muted); flex-shrink: 0;
+    }
+    .nr-badge.done { background: rgba(201,169,110,0.18); color: var(--gold); }
+    .nr-badge.current { background: var(--gold); color: var(--navy); font-weight: 700; }
+
+    .nr-content { flex: 1; min-width: 0; }
+    .nr-title {
+      font-size: 14px; color: var(--cream);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .nr-status { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .nr-status.gold { color: var(--gold); }
+
+    /* ---- Night Detail ---- */
+    .nd-header {
+      background: var(--navy); position: sticky; top: 57px; z-index: 90;
+      padding: 14px 20px 0;
+    }
+    .back-btn {
+      display: flex; align-items: center; gap: 6px;
+      color: var(--gold); font-size: 13px;
+      background: none; border: none; cursor: pointer;
+      margin-bottom: 14px; padding: 0;
+    }
+    .nd-intro { padding: 0 20px 16px; }
+    .nd-night-label {
+      font-size: 11px; color: var(--gold);
+      text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;
+    }
+    .nd-title {
+      font-family: 'Lora', Georgia, serif; font-size: 24px;
+      color: var(--cream); line-height: 1.3; margin-bottom: 12px;
+    }
+    .nd-objective {
+      font-size: 14px; color: var(--muted); line-height: 1.65;
+      font-style: italic;
+      background: var(--card); border-radius: 12px;
+      padding: 14px 16px; border-left: 3px solid var(--gold);
+      margin-bottom: 12px;
+    }
+    .nd-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+    .chip {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 12px; color: var(--muted);
+      background: var(--card); padding: 5px 12px; border-radius: 20px;
+    }
+    .chip.gold { color: var(--gold); background: rgba(201,169,110,0.1); }
+
+    .tabs-bar {
+      display: flex; border-bottom: 1px solid var(--border);
+      padding: 0 20px; overflow-x: auto; scrollbar-width: none;
+      background: var(--navy);
+    }
+    .tabs-bar::-webkit-scrollbar { display: none; }
+    .tab-btn {
+      padding: 11px 14px; font-size: 13px; color: var(--muted);
+      cursor: pointer; white-space: nowrap;
+      background: none; border: none;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      transition: color 0.18s;
+    }
+    .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+    .tab-panel { padding: 20px; display: none; }
+    .tab-panel.active { display: block; }
+
+    .lesson-body {
+      font-size: 15px; color: rgba(250,250,250,0.83);
+      line-height: 1.85;
+    }
+    .lesson-body p { margin-bottom: 14px; }
+
+    .action-box {
+      background: var(--card); border-radius: 14px;
+      padding: 20px; border: 1px solid var(--border);
+    }
+    .action-box-title {
+      font-family: 'Lora', Georgia, serif; font-size: 15px;
+      color: var(--gold); margin-bottom: 10px;
+    }
+    .action-box-text {
+      font-size: 15px; color: rgba(250,250,250,0.83); line-height: 1.75;
+    }
+
+    .checklist-progress-row {
+      display: flex; justify-content: space-between;
+      font-size: 13px; color: var(--muted); margin-bottom: 12px;
+    }
+    .checklist-progress-row span:last-child { color: var(--gold); font-weight: 600; }
+
+    .cl-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 13px 0; cursor: pointer;
+      border-bottom: 1px solid rgba(123,142,166,0.12);
+    }
+    .cl-item:last-child { border-bottom: none; }
+    .cl-circle {
+      width: 24px; height: 24px; border-radius: 50%;
+      border: 2px solid var(--muted); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .cl-circle.done { background: var(--gold); border-color: var(--gold); }
+    .cl-text { font-size: 14px; color: rgba(250,250,250,0.85); line-height: 1.5; padding-top: 1px; }
+    .cl-text.done { text-decoration: line-through; color: var(--muted); }
+
+    .journal-prompt-text {
+      font-family: 'Lora', Georgia, serif; font-size: 17px;
+      color: var(--cream); font-style: italic; line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    textarea.journal-input {
+      width: 100%; background: var(--card);
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px 16px; color: var(--white); font-size: 14px;
+      line-height: 1.7; min-height: 140px; resize: vertical;
+      font-family: inherit; outline: none; transition: border-color 0.2s;
+    }
+    textarea.journal-input:focus { border-color: var(--gold); }
+    .btn-outline-gold {
+      margin-top: 10px; width: 100%;
+      background: none; border: 1px solid var(--gold); color: var(--gold);
+      border-radius: 10px; padding: 11px; font-size: 14px;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn-outline-gold:active { background: rgba(201,169,110,0.1); }
+
+    .closing-box {
+      background: var(--card); border-radius: 14px;
+      padding: 22px; margin-top: 24px; text-align: center;
+      border: 1px solid var(--border);
+    }
+    .closing-quote {
+      font-family: 'Lora', Georgia, serif; font-size: 16px;
+      color: var(--gold); font-style: italic; line-height: 1.6;
+    }
+
+    .complete-bar {
+      position: sticky; bottom: 80px; z-index: 90;
+      background: var(--navy); padding: 14px 20px;
+      border-top: 1px solid var(--border);
+    }
+    .btn-complete {
+      width: 100%; background: var(--gold); color: var(--navy);
+      border: none; border-radius: 12px; padding: 15px;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      transition: opacity 0.2s; letter-spacing: 0.2px;
+    }
+    .btn-complete:active { opacity: 0.88; }
+    .completed-badge {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; padding: 14px; color: var(--gold); font-size: 14px; font-weight: 600;
+    }
+
+    /* ---- Audios ---- */
+    .audio-card {
+      background: var(--card); border-radius: 16px;
+      padding: 20px; margin-bottom: 12px; border: 1px solid var(--border);
+    }
+    .audio-card-header { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+    .audio-icon {
+      width: 46px; height: 46px; border-radius: 50%;
+      background: rgba(201,169,110,0.12);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .audio-name {
+      font-family: 'Lora', Georgia, serif; font-size: 17px; color: var(--cream);
+    }
+    .audio-nights-label { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .audio-desc { font-size: 13px; color: rgba(250,250,250,0.65); line-height: 1.6; margin-bottom: 12px; }
+    audio {
+      width: 100%; height: 36px; border-radius: 8px; outline: none;
+      accent-color: var(--gold);
+    }
+    .audio-placeholder {
+      background: var(--blue-mid); border-radius: 8px;
+      padding: 10px 14px; font-size: 12px; color: var(--muted);
+    }
+
+    /* ---- Recursos ---- */
+    .resource-card {
+      display: flex; align-items: center; gap: 14px;
+      background: var(--card); border-radius: 14px;
+      padding: 18px 16px; margin-bottom: 10px;
+      border: 1px solid var(--border); cursor: pointer;
+      text-decoration: none; transition: background 0.15s;
+    }
+    .resource-card:active { background: var(--blue-mid); }
+    .resource-icon {
+      width: 46px; height: 46px; border-radius: 12px;
+      background: rgba(201,169,110,0.12);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .resource-name { font-size: 15px; color: var(--cream); font-weight: 500; }
+    .resource-desc { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+    /* ---- Bottom Nav ---- */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      width: 100%;
+      background: var(--blue-mid); border-top: 1px solid var(--border);
+      display: flex; z-index: 200;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .nav-btn {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 3px; padding: 10px 0;
+      background: none; border: none; cursor: pointer;
+      color: var(--muted); font-size: 10px;
+      transition: color 0.18s; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .nav-btn.active { color: var(--gold); }
+    .nav-btn svg { width: 22px; height: 22px; }
+
+    /* ---- Toast ---- */
+    .toast {
+      position: fixed; top: 70px; left: 50%; transform: translateX(-50%);
+      background: var(--gold); color: var(--navy);
+      padding: 11px 22px; border-radius: 20px;
+      font-size: 13px; font-weight: 700;
+      z-index: 999; white-space: nowrap;
+      animation: toastIn 0.3s ease;
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(-12px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+
+    /* Divider */
+    .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+    /* Hotmart CTA */
+    .hotmart-cta {
+      background: var(--card); border-radius: 14px;
+      padding: 20px; margin-top: 20px;
+      border: 1px solid var(--border); text-align: center;
+    }
+    .hotmart-cta p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+    .hotmart-cta a {
+      display: inline-block; margin-top: 12px;
+      background: var(--gold); color: var(--navy);
+      text-decoration: none; border-radius: 10px;
+      padding: 10px 20px; font-size: 13px; font-weight: 700;
+    }
+    /* ---- App Wrapper (desktop layout) ---- */
+    .app-wrapper {
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ---- Sidebar (desktop only) ---- */
+    .sidebar {
+      display: none;
+    }
+
+    /* ---- Mobile: #app takes full width ---- */
+    #app {
+      flex: 1;
+      min-width: 0;
+      position: relative;
+      z-index: 1;
+      padding-bottom: calc(80px + env(safe-area-inset-bottom));
+    }
+
+    /* ---- Desktop (>=768px) ---- */
+    @media (min-width: 768px) {
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        width: 240px;
+        flex-shrink: 0;
+        background: rgba(26,39,68,0.95);
+        border-right: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        padding: 28px 0 20px;
+        backdrop-filter: blur(12px);
+      }
+      .sidebar-logo {
+        display: flex; align-items: center; gap: 10px;
+        padding: 0 20px 4px;
+      }
+      .sidebar-logo svg { fill: var(--gold); width: 24px; height: 24px; flex-shrink: 0; }
+      .sidebar-logo-title {
+        font-family: 'Lora', Georgia, serif;
+        font-size: 14px; color: var(--cream); line-height: 1.2;
+      }
+      .sidebar-logo-sub {
+        font-size: 11px; color: var(--muted); letter-spacing: 0.3px;
+        padding: 0 20px 24px;
+        margin-top: 2px;
+      }
+      .sidebar-divider {
+        height: 1px; background: var(--border); margin: 0 20px 16px;
+      }
+      .sidebar-nav {
+        flex: 1;
+        display: flex; flex-direction: column; gap: 4px;
+        padding: 0 12px;
+      }
+      .sidebar-nav-btn {
+        display: flex; align-items: center; gap: 12px;
+        padding: 11px 12px; border-radius: 10px;
+        background: none; border: none; cursor: pointer;
+        color: var(--muted); font-size: 14px; font-weight: 500;
+        font-family: 'Raleway', sans-serif;
+        transition: background 0.18s, color 0.18s;
+        text-align: left; width: 100%;
+      }
+      .sidebar-nav-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+      .sidebar-nav-btn:hover { background: rgba(201,169,110,0.08); color: var(--cream); }
+      .sidebar-nav-btn.active { background: rgba(201,169,110,0.15); color: var(--gold); }
+
+      .sidebar-footer {
+        padding: 16px 12px 0;
+        display: flex; flex-direction: column; gap: 8px;
+        border-top: 1px solid var(--border);
+        margin-top: 12px;
+      }
+      .sidebar-install-btn {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        width: 100%; background: rgba(201,169,110,0.15);
+        border: 1px solid var(--gold); color: var(--gold);
+        border-radius: 10px; padding: 10px 12px;
+        font-size: 13px; font-weight: 600; cursor: pointer;
+        font-family: 'Raleway', sans-serif;
+        transition: background 0.18s;
+      }
+      .sidebar-install-btn:hover { background: rgba(201,169,110,0.25); }
+      .sidebar-install-btn svg { width: 15px; height: 15px; }
+      .sidebar-reset-btn {
+        background: none; border: none; color: var(--muted);
+        font-size: 11px; cursor: pointer; text-align: center;
+        font-family: 'Raleway', sans-serif; padding: 6px;
+      }
+      .sidebar-reset-btn:hover { color: var(--cream); }
+
+      /* Hide mobile-only elements on desktop */
+      .app-header { display: none !important; }
+      .bottom-nav { display: none !important; }
+      .install-banner { display: none !important; }
+
+      #app {
+        padding-bottom: 40px;
+        max-width: 760px;
+      }
+
+      /* Night detail sticky header adjusts for no app-header */
+      .nd-header { top: 0; }
+      .complete-bar { bottom: 0; }
+
+      .screen { padding: 32px 36px; }
+      .night-detail-screen-content { padding: 0 36px 36px; }
+
+      /* Night rows: 2-column grid on wide screens */
+      @media (min-width: 1100px) {
+        #app { max-width: 900px; }
+        .nights-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+        }
+        .nights-grid .night-row { margin-bottom: 0; }
+      }
+    }
+
+    /* ---- Install Modal ---- */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(13,22,40,0.85);
+      z-index: 500;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(6px);
+    }
+    .modal-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: 100%; max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px 24px;
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .modal-title {
+      font-family: 'Lora', Georgia, serif;
+      font-size: 20px; color: var(--cream);
+    }
+    .modal-close {
+      background: none; border: none; color: var(--muted);
+      font-size: 20px; cursor: pointer; padding: 4px 8px;
+      line-height: 1; border-radius: 6px; transition: color 0.18s;
+    }
+    .modal-close:hover { color: var(--cream); }
+    .install-os {
+      background: var(--blue-mid);
+      border-radius: 14px;
+      padding: 18px; margin-bottom: 12px;
+      border: 1px solid var(--border);
+    }
+    .install-os-title {
+      font-size: 13px; font-weight: 700;
+      color: var(--gold); text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .install-os-title svg { width: 16px; height: 16px; }
+    .install-steps {
+      list-style: none;
+      counter-reset: step;
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .install-steps li {
+      counter-increment: step;
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 14px; color: rgba(250,250,250,0.8); line-height: 1.5;
+    }
+    .install-steps li::before {
+      content: counter(step);
+      background: rgba(201,169,110,0.2);
+      color: var(--gold);
+      font-size: 11px; font-weight: 700;
+      width: 20px; height: 20px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .install-steps strong { color: var(--cream); }
+    .install-hint {
+      font-size: 12px; color: var(--muted);
+      text-align: center; margin-top: 16px; line-height: 1.5;
+    }
+
+    /* Mobile install banner */
+    .install-banner {
+      background: var(--blue-mid);
+      border: 1px solid var(--border);
+      border-radius: 14px; padding: 14px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; gap: 12px;
+    }
+    .install-banner-text { font-size: 13px; color: var(--muted); line-height: 1.4; flex: 1; }
+    .install-banner-text strong { color: var(--cream); display: block; margin-bottom: 2px; font-size: 14px; }
+    .install-banner-btn {
+      background: none; border: 1px solid var(--gold); color: var(--gold);
+      border-radius: 8px; padding: 8px 14px;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      font-family: 'Raleway', sans-serif;
+      white-space: nowrap; flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+<div id="stars"></div>
+
+<!-- ===== INSTALL MODAL ===== -->
+<div id="install-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeInstallModal()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title">Instalar la App</span>
+      <button class="modal-close" onclick="closeInstallModal()" aria-label="Cerrar">&times;</button>
+    </div>
+
+    <div class="install-os">
+      <div class="install-os-title">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        iPhone / iPad — Safari
+      </div>
+      <ol class="install-steps">
+        <li>Abrí esta página en <strong>Safari</strong> (no Chrome ni otro)</li>
+        <li>Tocá el ícono de <strong>Compartir</strong> <strong>↑</strong> en la barra inferior</li>
+        <li>Deslizá hacia abajo y tocá <strong>"Añadir a pantalla de inicio"</strong></li>
+        <li>Tocá <strong>"Añadir"</strong> — la app aparece en tu pantalla de inicio</li>
+      </ol>
+    </div>
+
+    <div class="install-os">
+      <div class="install-os-title">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 15.341c-.297.937-1.13 1.476-1.13 1.476s.108-.57.298-1.476H7.308L6 16.863h-.617C3.712 16.863 3 17.5 3 17.5h18s-.74-.637-2.37-.637h-.617l-1.308-2.052h-8.352c.19.906.298 1.476.298 1.476s-.833-.539-1.13-1.476H3.75L6.5 20h11l2.75-4.659h-2.727zm-4.023-1.5a5 5 0 0 0 5-5 5 5 0 0 0-5-5 5 5 0 0 0-5 5 5 5 0 0 0 5 5zm0-8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5A3.5 3.5 0 0 1 10 8.841a3.5 3.5 0 0 1 3.5-3.5z"/></svg>
+        Android — Chrome
+      </div>
+      <ol class="install-steps">
+        <li>Abrí esta página en <strong>Chrome</strong></li>
+        <li>Tocá los <strong>tres puntos ⋮</strong> en la esquina superior derecha</li>
+        <li>Seleccioná <strong>"Instalar aplicación"</strong> o <strong>"Añadir a pantalla de inicio"</strong></li>
+        <li>Confirmá tocando <strong>"Instalar"</strong></li>
+      </ol>
+    </div>
+
+    <div class="install-os">
+      <div class="install-os-title">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 18H4V6h16m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/></svg>
+        Computadora — Chrome o Edge
+      </div>
+      <ol class="install-steps">
+        <li>Mirá en la <strong>barra de dirección</strong> el ícono de instalación <strong>⊕</strong> a la derecha</li>
+        <li>Hacé clic en él y seleccioná <strong>"Instalar"</strong></li>
+        <li>Si no aparece, andá al menú <strong>⋮ → Guardar e instalar → Instalar</strong></li>
+        <li>La app se abre como ventana independiente, sin barra del navegador</li>
+      </ol>
+    </div>
+
+    <p class="install-hint">Una vez instalada, abrís la app desde tu pantalla de inicio o escritorio — sin necesidad de abrir el navegador.</p>
+  </div>
+</div>
+
+<!-- ===== APP WRAPPER ===== -->
+<div class="app-wrapper">
+
+  <!-- Sidebar (desktop/tablet) -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/></svg>
+      <div class="sidebar-logo-title">Duerme Mejor</div>
+    </div>
+    <div class="sidebar-logo-sub">en 21 Noches</div>
+    <div class="sidebar-divider"></div>
+    <nav class="sidebar-nav">
+      <button class="sidebar-nav-btn active" data-nav="home" onclick="navigate('home')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        Inicio
+      </button>
+      <button class="sidebar-nav-btn" data-nav="programa" onclick="navigate('programa')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h7v7H3zm0 11h7v7H3zm11-11h7v7h-7zm0 11h7v7h-7z"/></svg>
+        Programa
+      </button>
+      <button class="sidebar-nav-btn" data-nav="audios" onclick="navigate('audios')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+        Audios
+      </button>
+      <button class="sidebar-nav-btn" data-nav="recursos" onclick="navigate('recursos')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 14H8v-2h8v2zm0-4H8v-2h8v2zm-3-4H8V6h5v2z"/></svg>
+        Recursos
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="sidebar-install-btn" onclick="showInstallModal()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        Instalar la app
+      </button>
+      <button class="sidebar-reset-btn" onclick="if(confirm('¿Reiniciar todo el progreso?')){resetProgress();}">Reiniciar progreso</button>
+    </div>
+  </aside>
+
+  <!-- Main app (mobile header + screens + mobile bottom nav) -->
+  <div id="app">
+    <header class="app-header">
+      <div class="app-header-left">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>
+        </svg>
+        <span class="app-header-title">Duerme Mejor en 21 Noches</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px;">
+        <button class="reset-btn" onclick="showInstallModal()" style="font-size:10px;letter-spacing:0.3px;">Instalar</button>
+        <button class="reset-btn" onclick="if(confirm('¿Reiniciar todo el progreso?')){resetProgress();}">&#8635;</button>
+      </div>
+    </header>
+
+    <!-- HOME -->
+    <section id="screen-home" class="screen active"></section>
+    <!-- PROGRAMA -->
+    <section id="screen-programa" class="screen"></section>
+    <!-- NIGHT DETAIL -->
+    <section id="screen-night" class="screen"></section>
+    <!-- AUDIOS -->
+    <section id="screen-audios" class="screen"></section>
+    <!-- RECURSOS -->
+    <section id="screen-recursos" class="screen"></section>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-nav="home" onclick="navigate('home')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+        Inicio
+      </button>
+      <button class="nav-btn" data-nav="programa" onclick="navigate('programa')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h7v7H3zm0 11h7v7H3zm11-11h7v7h-7zm0 11h7v7h-7z"/></svg>
+        Programa
+      </button>
+      <button class="nav-btn" data-nav="audios" onclick="navigate('audios')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+        Audios
+      </button>
+      <button class="nav-btn" data-nav="recursos" onclick="navigate('recursos')">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 14H8v-2h8v2zm0-4H8v-2h8v2zm-3-4H8V6h5v2z"/></svg>
+        Recursos
+      </button>
+    </nav>
+  </div>
+
+</div>
+
+<script>
+// ================================================================
+// DATA
+// ================================================================
+const PROGRAM = [
+  {
+    night:1,title:"Diagnóstico de tu descanso actual",
+    objective:"Tomar una fotografía honesta de cómo estás durmiendo en este momento, sin juzgar ni intentar cambiar nada todavía. Esta noche es solo de observación.",
+    lesson:"Antes de cambiar cualquier hábito, necesitás saber con qué estás trabajando. Parece obvio, pero la mayoría de las personas que empiezan a trabajar su sueño lo hacen reaccionando a la última noche mala, no mirando el patrón real. Esta noche vas a hacer lo que no hacemos naturalmente: observar sin intervenir.\n\nEl sueño tiene varios componentes que vale la pena conocer aunque sea en términos simples. La latencia de sueño es el tiempo que tardás desde que apagás la luz hasta que te dormís. La eficiencia es la proporción de tiempo que estás durmiendo realmente respecto a cuánto tiempo estás en la cama. Los despertares nocturnos son los momentos en que te despertás durante la noche y te cuesta volver a dormirte. Y la calidad percibida es cómo te sentís al levantarte, independientemente de cuántas horas dormiste.\n\nNinguno de estos indicadores por sí solo dice todo. Alguien puede dormir 8 horas y sentirse agotado porque su sueño fue fragmentado. Otra persona puede dormir 6 horas y sentirse bien porque su sueño fue eficiente. El diagnóstico inicial no es para alarmarte ni para compararte con estándares ideales que se publican en artículos — es para que tengas un punto de partida tuyo, personal.\n\nUna cosa más: el objetivo de este programa no es que duermas exactamente 8 horas, ni que nunca te despertés de noche. El objetivo es que el sueño deje de ser una fuente de preocupación y se convierta en algo que funciona lo suficientemente bien para que puedas vivir bien. Empezamos desde donde estás, no desde donde deberías estar.",
+    action:"Esta noche completá el cuestionario de diagnóstico inicial en tu diario del sueño. Respondé con lo que recuerdes de los últimos 3 a 5 días, sin exagerar ni minimizar. Si no recordás bien, estimá. La precisión perfecta no importa — lo que importa es la tendencia general.",
+    checklist:["Anoté mi hora aproximada de dormirme los últimos 3 días","Anoté mi hora de despertar esos mismos días","Califiqué mi energía al levantarme del 1 al 5 (1 = agotado, 5 = descansado)","Identifiqué 1 cosa que creo que más interfiere con mi sueño","Completé el diagnóstico inicial en mi diario del sueño"],
+    journalPrompt:"¿Cómo describirías tu relación con el sueño en este momento? ¿Es algo que fluye o algo con lo que peleás?",
+    audio:null,closingPhrase:"El primer paso no es dormir mejor — es ver con claridad lo que está pasando.",estimatedMinutes:10
+  },
+  {
+    night:2,title:"Tu horario de desconexión",
+    objective:"Definir un horario de corte entre el día y la noche para empezar a enviarle señales claras a tu cerebro de que el día terminó.",
+    lesson:"Uno de los problemas más comunes no es que la gente no pueda dormir — es que no le dan al cerebro ninguna señal de que el día terminó. El día sigue hasta que caen sobre la almohada, y entonces esperan que el sistema nervioso, que estuvo activo doce horas, se apague en treinta segundos. No funciona así.\n\nEl cerebro necesita transición. No puede pasar de reuniones, pantallas, conversaciones difíciles y decisiones pendientes a un estado de sueño profundo sin un puente. Ese puente es lo que llamamos el horario de desconexión: un corte intencional que marca el final del día activo.\n\nNo tiene que ser una hora entera de rituales elaborados. Puede ser tan simple como una hora concreta en la que dejás de responder mensajes de trabajo, o en la que cerrás el noticiero, o en la que bajás la intensidad general de lo que estás haciendo. Lo que importa no es lo que hacés exactamente — es que hay un momento claro en que el día pasa a ser noche.\n\nLa consistencia importa más que la perfección. Un horario de desconexión imperfecto pero aplicado la mayoría de los días vale mucho más que uno ideal que no podés sostener. Empezá con algo que puedas cumplir el 80% de las veces. Podés ajustarlo después.\n\nEsta noche vas a elegir tu hora de desconexión. No la hora en que querés dormirte — sino la hora en que querés que el día, como actividad intensa, termine. Idealmente entre 30 y 90 minutos antes de acostarte.",
+    action:"Elegí una hora de desconexión concreta y escribila en tu diario. Esta semana la vas a respetar al menos 4 de los 7 días. No tiene que ser perfecta — tiene que ser tuya y realista.",
+    checklist:["Decidí mi hora de desconexión y la escribí","Configuré una alarma o recordatorio a esa hora","Apagué o silencié notificaciones de trabajo a esa hora","Hice al menos una actividad de transición (leer, caminar, música tranquila)","Anoté en mi diario cómo me sentí antes de acostarme esta noche"],
+    journalPrompt:"¿Qué está pasando habitualmente justo antes de que decidís ir a dormir? ¿Lo elegís o simplemente caés?",
+    audio:"soltar",closingPhrase:"Esta noche decidiste dónde termina el día.",estimatedMinutes:10
+  },
+  {
+    night:3,title:"Reducir estímulos antes de dormir",
+    objective:"Identificar cuáles estímulos mantienen tu sistema nervioso activo por las noches, y hacer un ajuste concreto esta semana.",
+    lesson:"Podés estar exhausto y al mismo tiempo tener el sistema nervioso demasiado activo para dormir. Eso no es una contradicción — es lo que le pasa al cuerpo cuando recibe señales de alerta o activación hasta el momento de acostarse. El cansancio y el estado de arousal son dos cosas distintas.\n\nLos estímulos que más activan el sistema nervioso antes de dormir no siempre son los más obvios. No es solo la cafeína o el ejercicio nocturno. Es revisar el mail por última vez a las 11 de la noche. Es una conversación difícil que dejaste para último momento. Es ver noticias que te generan tensión o angustia. Es responder mensajes mientras ya estás en la cama. Cada uno de esos eventos le dice al sistema nervioso: todavía hay cosas que atender, no es momento de relajarse.\n\nLa pregunta relevante no es si podés hacer esas cosas — en general podés. La pregunta es a qué costo. Si de manera consistente tu mente está activa cuando querés dormirte, vale la pena mirar qué ocurrió en la hora previa.\n\nReducir estímulos no significa convertir las noches en una experiencia monástica. Significa ser más selectivo con lo que elegís consumir o hacer cerca de la hora de dormir. Una serie tranquila es diferente a un thriller de acción. Leer un libro es diferente a scrollear redes sociales. El objetivo esta noche es que hagás un inventario honesto: ¿qué actividades o estímulos llenaron tu última hora en los últimos días? ¿Cuál de ellos te dejó más activado/a?",
+    action:"Escribí una lista de todo lo que hacés habitualmente en la última hora antes de dormir. Subrayá los que te generan más activación. Esta semana elegí uno solo para reducir o mover a horarios más tempranos.",
+    checklist:["Escribí mi lista de actividades en la última hora del día","Identifiqué 1 estímulo que más me activa","Lo reemplacé o moví a un horario más temprano","Elegí una actividad más tranquila para ese momento","Noté cómo me sentía al acostarme esta noche comparado con otras"],
+    journalPrompt:"¿Qué actividad nocturna te deja más activo/a o con la mente encendida antes de dormir?",
+    audio:"respiracion",closingPhrase:"No podés apagar el día de golpe — podés ir bajando el volumen.",estimatedMinutes:12
+  },
+  {
+    night:4,title:"Preparar tu ambiente",
+    objective:"Evaluar tu entorno de sueño en cuatro dimensiones clave y hacer al menos un cambio concreto esta noche para que el cuarto trabaje a tu favor.",
+    lesson:"El ambiente donde dormís no es neutral — puede facilitar el sueño o dificultarlo. Y aunque hay factores que no podés controlar, hay varios que sí podés ajustar sin grandes inversiones.\n\nLos cuatro pilares del ambiente de sueño son temperatura, oscuridad, ruido y orden visual.\n\nTemperatura: el cuerpo necesita bajar su temperatura central para iniciar y mantener el sueño. Un cuarto fresco (entre 18 y 20 grados aproximadamente) ayuda a ese proceso. Un cuarto caliente lo dificulta. Si no podés controlar el aire, una ventilación cruzada o una ducha tibia antes de acostarte pueden ayudar.\n\nOscuridad: cualquier fuente de luz, incluyendo las de standby de los aparatos electrónicos, puede interferir con la producción de melatonina. No tenés que vivir a oscuras total — pero vale la pena mirar si hay luces que podés tapar o apagar.\n\nRuido: el problema no es siempre el volumen — es la variabilidad. Un ruido constante y predecible molesta menos que los ruidos intermitentes. Si vivís en un entorno ruidoso, el ruido blanco puede ayudar.\n\nOrden visual: el desorden en el cuarto mantiene la mente activa porque hay estímulos visuales que seguir procesando. No se trata de tener un cuarto de revista — se trata de que cuando entrás a dormir, el ambiente te diga que este es el lugar del descanso.",
+    action:"Esta noche evaluá tu cuarto en los cuatro pilares: temperatura, oscuridad, ruido y orden visual. Hacé un cambio concreto en uno de ellos antes de acostarte.",
+    checklist:["Revisé la temperatura del cuarto y la ajusté si pude","Evalué las fuentes de luz y tapé o apagué al menos una","Identifiqué posibles fuentes de ruido y cómo manejarlas","Ordené o despejé al menos una parte visible del cuarto","Noté si el ambiente se siente diferente esta noche"],
+    journalPrompt:"¿Qué tiene tu cuarto que favorece el sueño? ¿Qué lo dificulta? ¿Qué cambio podrías hacer esta semana?",
+    audio:"escaneo",closingPhrase:"Tu cuarto puede ser tu aliado — esta noche empezaste a pedirle ese trabajo.",estimatedMinutes:10
+  },
+  {
+    night:5,title:"Checklist nocturna simple",
+    objective:"Diseñar y ejecutar por primera vez tu propia secuencia de acciones antes de dormir — una rutina corta, repetible y tuya.",
+    lesson:"Las rutinas antes de dormir funcionan, pero no por ninguna razón misteriosa. Funcionan porque el cerebro aprende por asociación. Cuando repetís una secuencia de acciones consistentemente antes de dormirte, esas acciones se convierten en señales contextuales: el cerebro las reconoce y empieza a prepararse para el sueño antes de que siquiera te acuestes.\n\nPensá en cómo los niños pequeños tienen rituales de sueño muy marcados: el baño, el pijama, el cuento, las luces bajas. Eso no es capricho — es que el sistema nervioso responde muy bien a las señales contextuales. Lo que pasa es que los adultos también respondemos a esas señales, solo dejamos de aplicarlas.\n\nUna checklist nocturna no tiene que ser complicada. Cinco pasos claros, ejecutados en el mismo orden, ya son suficientes para empezar. Lo que importa es la consistencia, no la elaboración. Una rutina de 10 minutos que hacés 6 días de 7 vale mucho más que una de 45 minutos que hacés cuando tenés tiempo.\n\nAlgunas ideas de qué puede incluir tu checklist: preparar la ropa de mañana, escribir tres palabras sobre el día, hacer un tramo de respiración, apagar dispositivos, preparar el cuarto. Lo que elijas tiene que sentirse natural para vos — no tiene que ser lo que recomienda ningún gurú. Esta noche vas a diseñar tu checklist personal y ejecutarla por primera vez.",
+    action:"Escribí tu checklist nocturna de 5 pasos en tu diario. Ordenálos de forma lógica, terminando con la acción que más te lleve al modo descanso. Ejecutála esta noche en orden.",
+    checklist:["Escribí mi checklist personal de 5 pasos","Los ordené terminando con la acción más tranquila","Los ejecuté en orden esta noche","No usé pantallas entre pasos","La guardé para repetirla mañana"],
+    journalPrompt:"¿Qué 5 acciones te gustaría que fueran parte de tu preparación para dormir todas las noches?",
+    audio:"soltar",closingPhrase:"Una rutina no te obliga — te da un camino ya trazado cuando estás cansado/a.",estimatedMinutes:12
+  },
+  {
+    night:6,title:"Respiración para bajar revoluciones",
+    objective:"Aprender y practicar la técnica de respiración 4-6 como herramienta concreta para reducir el estado de alerta antes de dormir.",
+    lesson:"La respiración es una de las pocas funciones del cuerpo que es tanto automática como voluntaria. Eso la hace una herramienta muy accesible: no necesitás ningún equipamiento, no tenés que estar en un lugar especial, y podés usarla en cualquier momento.\n\nCuando el sistema nervioso está activado — por estrés, preocupaciones, pantallas, o simplemente el ritmo del día — la respiración tiende a ser rápida y superficial. Respirar de forma lenta y profunda, especialmente con exhalaciones más largas que las inhalaciones, activa el sistema nervioso parasimpático: el asociado al descanso, no al peligro y la acción.\n\nLa técnica que vas a practicar es simple: inhalás durante 4 tiempos, exhalás durante 6 tiempos. Por eso se llama 4-6. La exhalación más larga que la inhalación es la clave — es el mecanismo que activa esa respuesta de calma. No es autosugestión, es una señal fisiológica real.\n\nNo tenés que practicarla durante 20 minutos para que funcione. Cinco minutos sostenidos son suficientes para notar un cambio. Al principio puede sentirse forzado o antinatural. Es normal. Con repetición se vuelve más fácil y los efectos son más rápidos.\n\nUna aclaración: si durante la práctica sentís mareos o molestia, reducí el ritmo o volvé a respirar normalmente. No hay que forzar nada. El objetivo es reducir, no superar ningún récord.",
+    action:"Antes de acostarte esta noche, practicá la técnica 4-6 durante 5 minutos en un lugar cómodo. Podés hacerlo sentado/a en la cama o acostado/a. Si tu mente se distrae, volvé al conteo sin juzgarte. Al terminar, date un momento antes de revisar el teléfono.",
+    checklist:["Me acomodé en un lugar cómodo antes de empezar","Practiqué respiración 4-6 por al menos 5 minutos","Cuando me distraje, volví al conteo sin juzgarme","Noté algún cambio en mi cuerpo o en mi estado mental","Me acosté directamente después sin retomar pantallas"],
+    journalPrompt:"¿Qué notaste en tu cuerpo durante o después de la respiración? ¿Hubo algún momento en que se hizo más fácil o más difícil?",
+    audio:"respiracion",closingPhrase:"Tu respiración siempre estuvo ahí — esta noche empezaste a usarla.",estimatedMinutes:10
+  },
+  {
+    night:7,title:"Primera revisión semanal",
+    objective:"Revisar la primera semana del programa, reconocer lo que funcionó y hacer un ajuste concreto para la semana que viene.",
+    lesson:"Revisar no es juzgar. Es una de las confusiones más comunes cuando trabajamos hábitos: usamos la revisión como una oportunidad para reprocharnos lo que no hicimos. Esta revisión semanal no funciona así. Es una calibración — mirar lo que pasó con curiosidad para decidir qué ajustar.\n\nEn esta primera semana incorporaste cinco herramientas nuevas: el diagnóstico, un horario de desconexión, la reducción de estímulos, la preparación del ambiente, la checklist nocturna y la respiración 4-6. Es bastante. No se espera que las hayas aplicado todas perfectamente. Se espera que hayas empezado a observar y a probar.\n\nLo que vale la pena mirar en esta revisión: ¿cuál de los cambios que hiciste tuvo más impacto en cómo te sentiste? ¿Cuál resultó más difícil de sostener y por qué? ¿Hubo alguna noche especialmente buena o especialmente difícil? ¿Qué la hizo diferente?\n\nTambién es un buen momento para revisar si el horario de desconexión que elegiste es realista, si la checklist funciona para tu vida real, y si la respiración te resultó útil o necesitás ajustar cómo la practicás.\n\nLa revisión semanal no es un examen — es una conversación con vos mismo/a sobre cómo está yendo el proceso. Cuanto más honesta sea esa conversación, más útil va a ser el resto del programa.",
+    action:"Completá la revisión semanal en tu tracker. Revisá tus notas del diario de la semana antes de responder. Si no escribiste nada, respondé desde la memoria.",
+    checklist:["Releí mis notas o entradas del diario de esta semana","Identifiqué los 2 cambios que más impacto tuvieron","Identifiqué 1 cosa que quiero ajustar la semana próxima","Completé el tracker semanal","Definí 1 intención concreta para la semana 2"],
+    journalPrompt:"¿Qué fue lo más útil de esta primera semana? ¿Qué te sorprendió, aunque sea levemente?",
+    audio:null,closingPhrase:"Una semana de observación y ajuste ya es más de lo que la mayoría hace en meses.",estimatedMinutes:10
+  },
+  {
+    night:8,title:"Ajuste de pantallas",
+    objective:"Entender el impacto real de las pantallas en tu sueño — más allá de la luz azul — y diseñar una regla concreta que puedas sostener esta semana.",
+    lesson:"Mucho de lo que se habla sobre las pantallas y el sueño se enfoca en la luz azul. Es un factor real, pero probablemente no el más importante. Lo que más interfiere con el sueño no es la longitud de onda de la luz de la pantalla — es el contenido que consumís y lo que ese contenido le hace a tu sistema nervioso.\n\nRevisar redes sociales activa el circuito de comparación y validación social. Las noticias activan la respuesta a amenazas. Los mensajes de trabajo mantienen el modo de resolución de problemas. El contenido que genera estrés, ansiedad o urgencia mantiene el cerebro en modo hay cosas que atender — exactamente lo contrario de lo que necesitás para dormir.\n\nHay una diferencia grande entre ver una serie que te relaja y revisar el teléfono mientras respondés mensajes y scrolleás alternativamente. La primera puede ser una buena actividad de transición para algunas personas. La segunda raramente lo es.\n\nEl objetivo no es eliminar las pantallas de tu vida nocturna — para la mayoría eso no es posible ni necesario. El objetivo es ser más selectivo/a: ¿qué estás mirando? ¿A qué hora? ¿Con qué nivel de atención? ¿Qué estado te deja ese contenido cuando lo apagás?\n\nUna regla simple y sostenible vale más que una norma rígida que rompés a la segunda noche. Empezá por definir tu zona libre de trabajo nocturna, o una hora límite para el teléfono, o simplemente apagar notificaciones de ciertas apps después de cierta hora.",
+    action:"Esta noche definí una regla de pantallas concreta para esta semana. No tiene que ser drástica — tiene que ser honesta con tu vida real. Aplicala esta noche y escribí cómo fue.",
+    checklist:["Definí mi regla de pantallas específica para esta semana","La apliqué esta noche","Activé modo noche o cálido en mis dispositivos para la tarde-noche","Identifiqué mi uso de pantalla más problemático cerca de dormir","Elegí una actividad alternativa para ese momento"],
+    journalPrompt:"¿Qué hacés con el teléfono en los últimos 30 minutos antes de dormir? ¿Cómo te deja eso?",
+    audio:"soltar",closingPhrase:"No se trata de eliminar las pantallas — se trata de elegir cuándo y qué mirás.",estimatedMinutes:12
+  },
+  {
+    night:9,title:"Rutina de luz y oscuridad",
+    objective:"Usar la exposición a la luz como herramienta activa para regular tu ritmo circadiano, tanto por la mañana como por la noche.",
+    lesson:"Tu cuerpo tiene un reloj interno — el ritmo circadiano — que regula cuándo sentís sueño y cuándo sentís alerta. Ese reloj es muy real y tiene consecuencias concretas en cómo dormís. Y una de las principales señales que lo calibra es la luz.\n\nLa luz brillante por la mañana — especialmente la luz natural — le dice al reloj interno que el día empezó. Activa el cortisol de la mañana, frena la melatonina y pone en marcha el contador que va a determinar cuándo vas a tener ganas de dormir esa noche. Cuando no te exponés a luz en la mañana, el reloj se desincroniza. Cuando eso se repite durante semanas, empezás a tener problemas para dormirte o para despertarte a una hora coherente.\n\nDel otro lado, la oscuridad o la luz tenue por la noche le dice al cuerpo que el día terminó y activa la producción de melatonina. La luz artificial brillante — incluyendo la de las pantallas — interfiere con esa señal. No la borra completamente, pero la retrasa y la debilita.\n\nEl cambio más impactante tiene dos partes: luz brillante en los primeros 30 a 60 minutos del día (idealmente afuera, aunque sea 10 minutos) y luz tenue en la última hora antes de dormir. No tenés que comprar ningún gadget especial — con abrir las persianas por la mañana y usar lámparas de baja intensidad por la noche ya empezás a trabajar con el ritmo natural.\n\nEsta noche trabajamos en la parte nocturna. La mañana la incorporás como parte de tu rutina de despertar.",
+    action:"Esta noche bajá la intensidad de la luz en tu casa a partir de tu horario de desconexión. Si podés, usá solo lámparas de pie o luz cálida y tenue. Notá si eso cambia cómo te sentís al acostarte.",
+    checklist:["Bajé la intensidad de la iluminación después de mi horario de desconexión","Usé luz cálida o tenue en el cuarto antes de dormir","Planifiqué cómo exponer mis ojos a luz brillante en los primeros 30 minutos de mañana","Evalué si tengo luces de standby que iluminen el cuarto","Noté cómo me sentí con menos luz artificial esta noche"],
+    journalPrompt:"¿Cómo es tu exposición a la luz en la primera hora del día? ¿Y en la última hora antes de dormir?",
+    audio:"escaneo",closingPhrase:"La luz no es solo iluminación — es información para tu biología.",estimatedMinutes:12
+  },
+  {
+    night:10,title:"Diario de pensamientos",
+    objective:"Aprender a externalizar los pensamientos que circulan por la mente a la hora de dormir, para que no tengan que resolverse en la almohada.",
+    lesson:"Hay una razón por la que los pensamientos se disparan justo cuando querés dormirte: durante el día, el flujo constante de actividad, estímulos y tareas ocupa el espacio cognitivo. Cuando ese flujo se detiene y el ambiente se queda en silencio, los pensamientos que estuvieron esperando su turno finalmente encuentran el espacio para aparecer.\n\nNo es que de noche pensás cosas más graves. Es que de noche no hay nada más que capture tu atención. El resultado es que preocupaciones, tareas pendientes, conversaciones inconclusas o planes a medio armar empiezan a girar y a girar sin un destino claro.\n\nLa escritura funciona como una forma de externalización — sacás esos pensamientos de la cabeza y los ponés en algún lugar fuera de vos. Al hacerlo, el cerebro recibe una señal implícita de que esos pensamientos están registrados y no necesitan estar en circulación activa para no olvidarse. No es terapia y no resuelve los problemas — simplemente hace que no sea urgente mantenerlos en la mente mientras intentás dormir.\n\nLa técnica más simple se llama brain dump o descarga mental: escribís todo lo que está en tu cabeza, sin filtro, sin orden, sin intentar que tenga sentido. No necesita ser bonito, no lo va a leer nadie. Es solo un vaciado. Cinco o diez minutos son suficientes.\n\nUna variante útil es separar lo que está en tu cabeza en dos grupos: lo que podés hacer algo al respecto y lo que no depende de vos. Con el segundo grupo, a veces basta con reconocer que está ahí y que esta noche no lo vas a resolver.",
+    action:"Antes de acostarte esta noche, abrí tu diario y escribí durante 5 a 10 minutos todo lo que está en tu cabeza. Sin estructura, sin correcciones. Al terminar, cerrá el cuaderno con la intención de que eso se queda ahí.",
+    checklist:["Reservé 5-10 minutos para escribir antes de acostarme","Escribí todo lo que estaba en mi cabeza sin filtrar ni ordenar","No intenté resolver — solo anoté","Cerré el cuaderno con intención de dejarlo ahí","Me acosté con la mente un poco más despejada"],
+    journalPrompt:"¿Qué pensamientos o preocupaciones aparecen más seguido cuando intentás dormirte? ¿Hay alguno que se repite hace varios días?",
+    audio:"mente",closingPhrase:"No tenés que resolver todo esta noche — solo tenés que sacarlo de la cabeza.",estimatedMinutes:12
+  },
+  {
+    night:11,title:"Orden mental antes de dormir",
+    objective:"Instalar una práctica de cierre cognitivo que te permita pasar del modo hacer al modo descansar con más facilidad.",
+    lesson:"Hay dos tipos de personas cuando llega la noche: las que sienten que el día terminó y las que sienten que el día se quedó a medias. Para las segundas, el problema no es que hayan hecho pocas cosas — es que nunca hicieron el acto explícito de cerrar el día. El cerebro mantiene los loops abiertos activos hasta que recibe alguna señal de que puede soltarlos.\n\nUn cierre cognitivo del día es exactamente eso: un momento pequeño pero intencional en que revisás lo que hiciste, anotás lo que queda pendiente y decís, de alguna forma u otra, por hoy es suficiente. Este acto no elimina las responsabilidades — las reconoce y las deja en pausa hasta mañana.\n\nLa parte más útil del cierre no es el repaso de lo que hiciste, sino anotar las 2 o 3 cosas más importantes de mañana. Cuando las escribís, tu cerebro puede soltar la tarea de recordarlas. Si no las anotás, parte de tu mente va a seguir rumiando para no olvidarlas mientras dormís.\n\nTres preguntas simples pueden estructurar tu cierre en menos de 5 minutos: ¿qué terminé hoy?, ¿qué necesita atención mañana?, ¿hay algo que quiero soltar esta noche aunque no esté resuelto? Con esas tres respuestas escritas, tenés un cierre funcional.\n\nLa frase final importa más de lo que parece. Decirse a uno mismo por hoy es suficiente — aunque sea en voz baja — es un ancla. Le dice al sistema nervioso que el modo productivo está pausado y que puede empezar a relajarse.",
+    action:"Esta noche practicá el cierre cognitivo completo: anotá 3 cosas que terminaste hoy, escribí las 2-3 tareas más importantes de mañana, y cerrá con una frase que marque el fin del día activo.",
+    checklist:["Anoté 3 cosas que terminé o avancé hoy","Escribí las 2-3 tareas más importantes de mañana","Cerré apps de trabajo o productividad","Me dije (en voz alta o escrito): por hoy es suficiente","Pasé a mi rutina nocturna sin retomar tareas"],
+    journalPrompt:"¿Qué necesitás soltar mentalmente para poder descansar esta noche? ¿Hay algo que tu mente no quiere dejar ir?",
+    audio:"soltar",closingPhrase:"Cerrar el día conscientemente es un acto de respeto hacia vos mismo/a.",estimatedMinutes:10
+  },
+  {
+    night:12,title:"Protocolo para despertares nocturnos",
+    objective:"Tener un plan concreto y propio para los momentos en que te despertás a mitad de la noche, para que la reacción no empeore la situación.",
+    lesson:"Despertarse durante la noche es normal. La mayoría de las personas se despiertan brevemente varias veces por noche sin recordarlo a la mañana siguiente. El problema no es despertarse — es lo que hacemos cuando nos damos cuenta de que no podemos volver a dormir.\n\nLa reacción más común es revisar la hora. Eso desencadena una cadena de pensamientos casi automática: son las 3 de la mañana, me quedan 4 horas, mañana tengo algo importante, voy a estar agotado/a... Esa secuencia activa la respuesta de alerta, que hace exactamente lo contrario de ayudarte a volver a dormir.\n\nEl teléfono cerca de la cama amplifica este problema. Revisar la hora lleva a revisar notificaciones, lo que lleva a procesar información, lo que lleva a pensamientos que no tendrían que estar ahí a las 3 de la mañana.\n\nUn protocolo de despertar funciona porque convierte un momento de pánico en una secuencia conocida. En lugar de reaccionar, seguís pasos. Los pasos no tienen que ser complicados: respirar, notar el cuerpo, recordarte que despertarse es normal, hacer algo muy tranquilo si no podés volver a dormir, evitar la pantalla.\n\nLa decisión sobre cuándo levantarte si no podés dormir también vale la pena tenerla pensada de antemano. En general, si después de unos 20 minutos no lograste volver a dormirte, puede ser mejor levantarte y hacer algo muy tranquilo en poca luz hasta que el sueño vuelva, antes que quedarte en la cama con ansiedad creciente. Pero esto varía mucho por persona.",
+    action:"Escribí tu protocolo de 3 a 5 pasos para cuando te despertés a la noche. Dejalo escrito en tu diario o en un lugar accesible. Esta noche también decidí dónde ponés el teléfono para no tenerlo al alcance inmediato.",
+    checklist:["Escribí mis pasos de protocolo para despertares nocturnos","Decidí dónde pongo el teléfono esta noche (no al alcance inmediato)","Practiqué la respiración que usaré si me despierto","Dejé algo de muy baja estimulación disponible si lo necesito","Definí cuánto tiempo espero antes de decidir levantarme"],
+    journalPrompt:"¿Qué hacés generalmente cuando te despertás a la noche? ¿Qué parte de esa reacción empeora la situación?",
+    audio:"sos",closingPhrase:"Tener un plan transforma el pánico en pasos conocidos.",estimatedMinutes:12
+  },
+  {
+    night:13,title:"Hábitos de mañana",
+    objective:"Entender cómo lo que hacés en las primeras horas del día afecta directamente la calidad del sueño de esa noche, y diseñar una rutina de mañana mínima.",
+    lesson:"El sueño no empieza cuando apagás la luz — empieza con lo que hacés durante el día. Y específicamente, lo que hacés en la primera hora de la mañana tiene una influencia desproporcionada sobre cómo va a ser tu noche.\n\nEl cortisol de la mañana, cuando se activa bien, te da energía durante el día y baja gradualmente hacia la noche, facilitando el sueño. Lo que interfiere con esa curva natural es revisar el teléfono inmediatamente al despertar. El mail, las redes, las noticias y los mensajes ponen al sistema nervioso en modo reactivo antes de que el cuerpo haya terminado de despertar. Eso lleva a un día más estresado, con el sistema nervioso más activado hacia la noche.\n\nLa exposición a luz natural en los primeros 30 a 60 minutos del día ancla el ritmo circadiano. El movimiento físico temprano — aunque sea caminar 10 minutos — también contribuye a regular el ritmo y a bajar la inercia del sueño.\n\nNo se trata de convertir la mañana en una performance de productividad. Se trata de elegir intencionalmente cómo empezar el día. Incluso 10 minutos sin teléfono, con luz y con algún tipo de movimiento leve, ya son una diferencia significativa respecto a empezar el día respondiendo mensajes en la cama.\n\nLa rutina de mañana mínima que vas a diseñar esta noche no tiene que ser perfecta ni larga. Tiene que ser realista para tu horario. Puede ser tan simple como: levantarte, tomar agua, abrir las persianas, no revisar el teléfono por 10 minutos. Eso ya es una rutina de mañana.",
+    action:"Esta noche diseñá tu rutina de mañana mínima: 3 a 5 acciones, en menos de 15 minutos, que podás hacer antes de revisar el teléfono. Ejecutála mañana a la mañana.",
+    checklist:["Escribí mi rutina de mañana mínima (3-5 pasos, menos de 15 minutos)","Incluí luz natural y al menos 10 minutos sin teléfono","La preparé para mañana (ropa, agenda, lo que necesite)","La guardé en mi checklist de mañana del programa","Anoté qué espero observar si la hago durante una semana"],
+    journalPrompt:"¿Cómo son tus primeros 20 minutos del día habitualmente? ¿Qué cambiarías si pudieras?",
+    audio:null,closingPhrase:"Lo que hacés a las 7 de la mañana ya está construyendo el sueño de las 11 de la noche.",estimatedMinutes:10
+  },
+  {
+    night:14,title:"Segunda revisión semanal",
+    objective:"Revisar la segunda semana del programa, comparar con la primera y elegir qué llevar a la semana final.",
+    lesson:"Ya llegaste a la mitad del programa. Esto es un buen momento para hacer una parada un poco más larga que la primera revisión y mirar no solo la semana, sino las dos semanas juntas.\n\nEl progreso en el sueño raramente es lineal. Hay semanas donde todo parece que mejora, y de repente hay dos noches malas seguidas que hacen sentir que todo retrocedió. Eso no es retroceso — es variabilidad normal. Lo que importa no es la noche de ayer sino la tendencia de las últimas dos semanas.\n\nUna forma útil de ver el progreso es no solo preguntarse si dormís mejor, sino también: ¿qué cambió en mi comportamiento alrededor del sueño? ¿Tengo más información sobre mis propios patrones? ¿Reacciono diferente a las noches difíciles? Esos cambios son progreso real aunque no siempre se noten en la calidad del sueño de inmediato.\n\nEn esta segunda semana incorporaste herramientas más específicas: ajuste de pantallas, rutina de luz, brain dump, cierre cognitivo, protocolo de despertares y hábitos de mañana. No todas van a haberse instalado igual. Algunas van a resonar más, otras se habrán sentido forzadas o irrelevantes para tu situación particular.\n\nLa tercera semana es de consolidación y personalización. Para aprovecharla bien, necesitás tener claro qué herramientas de las primeras dos semanas realmente funcionaron para vos.",
+    action:"Completá la revisión semanal en tu tracker y compará con lo que escribiste en la Noche 7. Identificá los 2 o 3 cambios que más impacto tuvieron en estas dos semanas.",
+    checklist:["Releí mis entradas del diario de esta semana","Comparé con la revisión de la semana 1","Identifiqué los 2-3 hábitos con más impacto personal","Completé el tracker semanal","Decidí qué herramientas llevar a la semana final"],
+    journalPrompt:"¿Qué cambió en estas dos semanas, aunque sea sutilmente? ¿En tu sueño, en tu rutina, en cómo te relacionás con el descanso?",
+    audio:null,closingPhrase:"El progreso en el sueño no se mide noche a noche — se mide semana a semana.",estimatedMinutes:10
+  },
+  {
+    night:15,title:"Manejo de noches irregulares",
+    objective:"Desarrollar estrategias concretas para las noches en que todo se sale del plan, sin que una noche difícil arruine lo construido.",
+    lesson:"Las noches malas son inevitables. No importa cuántos hábitos sostengas ni cuánto trabajo hayas hecho — van a haber noches en que simplemente no podés dormir bien. Eso no es un fracaso del programa, ni tuyo: es parte del funcionamiento normal del sueño humano.\n\nEl problema real no es la noche mala en sí — es la espiral de pensamientos que a veces se genera alrededor de ella. La catastrofización nocturna: no voy a poder dormir, mañana voy a estar destruido/a, si esto sigue así no voy a funcionar... Esa espiral activa el sistema nervioso, lo cual hace más difícil dormir, lo cual confirma la predicción, y así en loop.\n\nUna cosa que ayuda es tener una perspectiva de largo plazo cuando estás en medio de una noche difícil. Una noche de sueño reducido no destruye tu funcionamiento cognitivo de manera irreversible. El cuerpo tiene mecanismos de compensación. Vas a estar más cansado/a — pero probablemente vas a poder hacer las cosas importantes del día.\n\nOtra trampa es la compensación excesiva: después de una mala noche, tratar de acostarse muy temprano, dormir siesta muy larga o quedarse en la cama muchas horas. Eso puede aliviar el cansancio inmediato pero fragmenta el ritmo para las noches siguientes. Una siesta corta de 20 a 30 minutos si lo necesitás es razonable. Más que eso puede complicar la noche siguiente.\n\nEsta noche vas a escribir tu plan personal para las noches difíciles: qué hacés si no podés dormirte, qué hacés el día después y qué no hacés para no desestabilizar el ritmo.",
+    action:"Escribí tu plan de acción para noches irregulares: qué hacés si no podés dormirte después de 30 minutos, qué hacés el día siguiente y qué evitás hacer para no desestabilizar más el ritmo.",
+    checklist:["Escribí qué haré si no puedo dormirme después de 30 minutos","Definí cómo voy a manejar el día después de una mala noche","Practiqué el Protocolo SOS esta noche","Noté si la ansiedad anticipatoria es parte de mi patrón","Me comprometí a no compensar en exceso (sin siestas largas, sin acostarme muy temprano)"],
+    journalPrompt:"¿Cómo te sentís o qué pensás cuando sabés que dormiste mal? ¿Hay pensamientos que se repiten?",
+    audio:"sos",closingPhrase:"Una noche difícil no borra lo que construiste — solo interrumpe el ritmo por un momento.",estimatedMinutes:12
+  },
+  {
+    night:16,title:"Plan para fines de semana",
+    objective:"Diseñar una estrategia realista para mantener los hábitos durante los fines de semana sin ser rígido ni tirar todo por la borda.",
+    lesson:"El fin de semana es donde muchos de los hábitos de sueño bien construidos durante la semana se desmoronan. No porque la gente sea inconsistente — sino porque el fin de semana tiene una lógica social y de descanso diferente que entra en conflicto con los horarios regulares.\n\nExiste un fenómeno llamado jet lag social: cuando dormís 2 o 3 horas más tarde los fines de semana y luego intentás volver a tu horario habitual el lunes, tu cuerpo tiene que readaptarse como si hubieras viajado a otra zona horaria. La energía del lunes o el martes a la mañana puede ser notablemente peor cuando esto ocurre de manera consistente.\n\nNo se trata de no salir nunca o convertir el fin de semana en una extensión del régimen de sueño. Se trata de tener un plan de cuánta variación te permitís y cómo volvés al ritmo sin drama.\n\nUna regla orientativa que funciona para muchas personas: permitirte hasta una hora de diferencia en tu horario de dormir los fines de semana. Con una hora de diferencia, el cuerpo se readapta mucho más fácilmente que con tres. Si trasnocháste, procurá mantener la hora de despertar lo más cercana posible a la habitual para no desplazar el ritmo más.\n\nTambién vale pensar en una versión simplificada de tu rutina nocturna para los fines de semana. No tiene que tener todos los pasos — con hacer los 3 más importantes ya mantenés la continuidad sin sentirte encadenado/a a un horario.",
+    action:"Diseñá tu versión fin de semana de la rutina: elegí cuánta variación de horario te permitís y cuáles son los 2 o 3 pasos de la rutina que vas a mantener sí o sí.",
+    checklist:["Definí mi variación máxima de horario para los fines de semana","Diseñé una versión simplificada de mi rutina para esos días","Identifiqué qué factor de fin de semana más me desregula","Planifiqué cómo volver al ritmo el domingo a la noche","Escribí mi plan en el diario o en la plantilla de Notion"],
+    journalPrompt:"¿Qué pasa con tu sueño los fines de semana? ¿Cómo te afecta el lunes o el martes?",
+    audio:null,closingPhrase:"La consistencia imperfecta supera la perfección intermitente, siempre.",estimatedMinutes:10
+  },
+  {
+    night:17,title:"Rutina mínima viable",
+    objective:"Crear una versión de 3 pasos de tu rutina nocturna para los días en que la vida no da margen para más.",
+    lesson:"Uno de los problemas con las rutinas elaboradas es que cuando no podés cumplirlas completas, tendés a no hacer nada. El todo o nada aplicado a los hábitos es un patrón muy común y muy destructivo: si no podés hacer los 8 pasos de tu rutina ideal, preferís no hacer ninguno. El resultado es que en los días más difíciles — cuando más necesitás la rutina — es exactamente cuando la abandonás.\n\nLa Rutina Mínima Viable, o RMV, rompe ese patrón. Es la versión reducida a su esencia: los 3 pasos que considerás más impactantes y que podés hacer en menos de 5 minutos, sin importar cuán tarde sea, cuán cansado/a estés o cuánto caos haya tenido el día.\n\nLa RMV no es un plan de emergencia — es tu ancla. En los días buenos hacés la rutina completa. En los días complicados hacés la RMV. En ninguno de los dos casos te quedás sin rutina.\n\nPara elegir tus 3 pasos, pensá en cuáles de todos los hábitos que trabajaste en estas dos semanas tuvieron más impacto en cómo dormiste. Para muchas personas son: apagar el teléfono, hacer 3 respiraciones lentas y hacer un mini cierre del día. Pero los tuyos pueden ser completamente distintos. Lo que importa es que sean los que realmente funcionan para vos.\n\nUna vez que tengás tu RMV definida, guardala en un lugar visible — en tu mesa de noche, en el teléfono, en la plantilla de Notion. Que esté disponible sin esfuerzo de búsqueda para cuando la necesités.",
+    action:"Esta noche definí tus 3 pasos de Rutina Mínima Viable. Escribilos, proba ejecutarlos esta noche (deberían poder hacerse en menos de 5 minutos) y guardalos en un lugar accesible.",
+    checklist:["Identifiqué mis 3 pasos más impactantes de las últimas 2 semanas","Los escribí como mi Rutina Mínima Viable","Los ejecuté esta noche y confirmé que duran menos de 5 minutos","Los guardé en un lugar visible y accesible","Definí en qué situaciones voy a recurrir a la RMV en lugar de la rutina completa"],
+    journalPrompt:"Si solo pudieras hacer 3 cosas antes de dormir, ¿cuáles serían? ¿Por qué esas tres?",
+    audio:"respiracion",closingPhrase:"Tres pasos pequeños hechos con constancia valen más que diez pasos hechos una vez.",estimatedMinutes:8
+  },
+  {
+    night:18,title:"Consolidación de hábitos",
+    objective:"Hacer un inventario honesto de qué hábitos se instalaron realmente, cuáles están en proceso y cuáles todavía necesitan trabajo.",
+    lesson:"Hay una diferencia entre hacer una tarea y tener un hábito. Una tarea la hacés cuando la recordás o cuando tenés energía. Un hábito lo hacés casi sin pensar, con poco esfuerzo, porque se convirtió en parte del flujo natural del día. No todos los hábitos de este programa se habrán instalado al mismo nivel — y está bien.\n\nLos hábitos se forman por repetición en contextos similares. No hay un número mágico de días que garantice que algo se instale. Depende de la complejidad del hábito, de cuánta resistencia inicial genera, de qué tan bien encaja con tu vida y de cuántas veces lo repetiste. Algunos hábitos se instalan en dos semanas; otros tardan meses.\n\nUna señal de que un hábito se instaló: lo extrañás cuando no lo hacés. O lo hacés sin acordarte de que lo decidiste conscientemente. O simplemente ya no siente como un esfuerzo. Una señal de que todavía está en proceso: cada vez que llega ese momento del día, tenés que recordarte activamente que lo querés hacer.\n\nLo que no ayuda es castigarte por los hábitos que no se instalaron todavía. Los hábitos no responden al juicio — responden a la repetición. Si algo no se instaló, la pregunta útil es: ¿es que el hábito no encaja con mi vida real? ¿O es que no encontré el momento adecuado? ¿O es que no lo practiqué suficientes veces?\n\nEsta noche vas a hacer un inventario en tres categorías: instalado, en proceso o pendiente. Ese inventario va a ser la base de tu protocolo personal de la Noche 19.",
+    action:"Listá todos los hábitos y herramientas del programa. Para cada uno, marcá si está instalado, en proceso o pendiente. Elegí 1 hábito en proceso que querés reforzar esta semana.",
+    checklist:["Listé todos los hábitos del programa (guiándome con las noches 1-17)","Clasifiqué cada uno: instalado / en proceso / pendiente","Elegí 1 hábito en proceso para reforzar","Escribí por qué ese hábito vale la pena para mí específicamente","Definí qué haré si fallo en él (sin castigo, con plan de retorno)"],
+    journalPrompt:"¿Qué hábito se siente más natural ahora que cuando empezaste? ¿Qué cambió en vos para que eso sea posible?",
+    audio:"escaneo",closingPhrase:"No todos los hábitos se instalan al mismo tiempo — lo que importa es que no los abandonaste.",estimatedMinutes:12
+  },
+  {
+    night:19,title:"Tu protocolo personal",
+    objective:"Integrar todo lo aprendido en un protocolo de sueño personal, escrito, propio y adaptado a tu vida real.",
+    lesson:"Durante 18 noches estuviste explorando, probando y ajustando. Probaste herramientas, algunas funcionaron y otras no tanto. Aprendiste cosas sobre tus propios patrones que antes no sabías. Construiste hábitos que antes no tenías.\n\nAhora llega el momento de convertir todo eso en algo tuyo, concreto y portable: tu Protocolo Personal de Sueño. No es una lista de cosas que se supone que hay que hacer — es un documento que refleja lo que realmente funciona para vos, en tu vida, con tu cuerpo y tu contexto.\n\nUn protocolo personal de sueño tiene varias partes. Tu horario ideal: a qué hora querés dormirte y a qué hora querés levantarte. Tu rutina nocturna completa: los pasos en orden, desde tu horario de desconexión hasta cerrar los ojos. Tu Rutina Mínima Viable para los días difíciles. Tu protocolo de despertares nocturnos. Y tus señales de alerta personales: las cosas específicas que sabés que interfieren con tu sueño.\n\nEste protocolo no es rígido. Puede evolucionar. Dentro de seis meses, si algo cambió en tu vida, lo ajustás. Si descubrís que algo no funciona, lo reemplazás. La rigidez en los hábitos de sueño genera más ansiedad que bienestar.\n\nTener el protocolo escrito tiene un valor concreto: cuando tenés una mala racha, en lugar de empezar de cero o buscar respuestas afuera, podés volver a lo que sí funcionó para vos. Es tu punto de referencia.",
+    action:"Esta noche escribí tu Protocolo Personal de Sueño completo. Puede ser en tu diario, en la plantilla de Notion del programa o en cualquier lugar donde lo puedas consultar fácilmente después.",
+    checklist:["Escribí mi horario ideal de sueño (hora de dormirme y hora de despertarme)","Documenté mi rutina nocturna completa en orden","Incluí mi RMV para días difíciles","Agregué mi protocolo de despertares nocturnos","Guardé el protocolo en un lugar accesible (Notion, diario, notas)"],
+    journalPrompt:"¿Cómo querés que sea tu relación con el sueño de ahora en adelante? ¿Qué lugar querés que ocupe en tu vida?",
+    audio:"soltar",closingPhrase:"Este protocolo no es de nadie más — es el resultado de 19 noches de trabajo tuyo.",estimatedMinutes:15
+  },
+  {
+    night:20,title:"Evaluación final",
+    objective:"Comparar honestamente dónde empezaste con dónde estás hoy, reconocer el progreso real y preparar el terreno para el mantenimiento.",
+    lesson:"La evaluación final no es un examen. Es una mirada hacia atrás que te permita ver, con cierta distancia, qué cambió desde la Noche 1. Y a veces, ver ese cambio requiere un poco de esfuerzo — porque el progreso en el sueño no siempre es dramático ni fácil de medir.\n\nCuando empezaste este programa, tal vez esperabas cambios grandes y rápidos. O tal vez esperabas que fuera más difícil de lo que fue. La realidad suele ser más matizada: algunas noches mejoraron, otras no tanto. Algunos hábitos se instalaron, otros siguen costando. Tu actitud frente al sueño quizás cambió aunque el sueño mismo no cambiara radicalmente todavía.\n\nHay formas de medir el progreso que van más allá de si dormís más horas. ¿Tenés un protocolo donde antes no había nada? ¿Sabés ahora qué factores afectan tu sueño, cuando antes no lo sabías? ¿Cuando tenés una noche difícil, reaccionás diferente? ¿Hay hábitos que antes no existían y ahora sí? Todo eso es progreso real.\n\nTambién es un buen momento para ser honesto/a sobre lo que todavía queda por trabajar. No para penalizarte, sino para que tengas claridad hacia adelante. ¿Hay un hábito que nunca terminó de instalarse? ¿Hay un patrón que sigue siendo difícil? Eso no se borra con el fin del programa — se sigue trabajando.\n\nLa evaluación final también incluye una nota para tu yo del futuro: algo que querés recordar de este proceso, algo que aprendiste sobre vos mismo/a o simplemente algo que te gustaría decirle a quien va a retomar estos hábitos en algún momento.",
+    action:"Completá la evaluación final: releé tu diagnóstico inicial de la Noche 1, respondé el cuestionario final y escribí al menos tres cosas que cambiaron en estas 21 noches.",
+    checklist:["Releí mi diagnóstico inicial de la Noche 1","Completé el cuestionario de evaluación final del programa","Identifiqué los 3 cambios más significativos de estas semanas","Reconocí algo que todavía quiero seguir trabajando","Escribí una nota para mi yo del futuro sobre este proceso"],
+    journalPrompt:"¿Qué aprendiste sobre vos y tu sueño en estas 21 noches? ¿Qué te sorprendió?",
+    audio:null,closingPhrase:"El progreso no siempre se ve — a veces se siente en cómo respondés a una noche difícil.",estimatedMinutes:12
+  },
+  {
+    night:21,title:"Plan de mantenimiento",
+    objective:"Diseñar el camino hacia adelante para sostener lo construido sin depender del programa, con un plan de tres niveles: diario, semanal y mensual.",
+    lesson:"El programa termina en la Noche 21, pero los hábitos no terminan. Esta última noche no es un cierre — es una transición. Pasás de seguir un programa a tener un protocolo propio que sostenés por tu cuenta.\n\nLos hábitos bien instalados no necesitan mucho esfuerzo de mantenimiento diario — simplemente los hacés. Lo que sí necesitan son revisiones periódicas para notar cuando empiezan a erosionarse y corregir antes de que se pierdan completamente.\n\nUn plan de mantenimiento tiene tres niveles. El nivel diario es tu RMV: los 3 pasos que hacés sí o sí, todas las noches, sin importar qué. Este es el piso mínimo que te comprometés a no bajar. El nivel semanal es un momento breve de 5 a 10 minutos en que revisás cómo fue tu semana de sueño: ¿hubo noches difíciles? ¿Qué las causó? ¿Qué ajustar? El nivel mensual es una revisión más amplia: ¿los hábitos del protocolo siguen funcionando? ¿Hay algo que cambió en tu vida que requiere ajustes?\n\nLa vida cambia. Las temporadas de trabajo intenso, los viajes, los cambios de horario, las situaciones emocionales difíciles — todo eso va a afectar tu sueño en algún momento. Y va a haber momentos en que el protocolo se afloje. Eso es normal y esperado.\n\nLo importante es saber cuándo retomar. Las señales de alerta son personales: para algunas personas es cuando llevan tres noches seguidas durmiendo mal, para otras cuando sienten que el cansancio interfiere con el trabajo o con el humor. Conocer tus señales te permite retomar antes de que el ciclo se instale.\n\nFelicitaciones por llegar hasta acá. Fueron 21 noches de trabajo consistente, de observación, de ajuste y de construcción. Eso vale — independientemente del nivel en que estén tus hábitos hoy.",
+    action:"Escribí tu Plan de Mantenimiento: definí tu compromiso diario (RMV), cuándo harás tus revisiones semanales, cuándo harás las mensuales y cuáles son tus señales de alerta personales para saber cuándo retomar el trabajo.",
+    checklist:["Escribí mi compromiso diario de mantenimiento (mi RMV)","Definí el día y momento de mis revisiones semanales","Planifiqué al menos 1 revisión mensual con recordatorio","Identifiqué mis señales de alerta personales para saber cuándo retomar","Me permití reconocer lo que construí en estas 21 noches"],
+    journalPrompt:"¿Qué necesitás de vos mismo/a para sostener estos hábitos en el tiempo? ¿Qué condiciones lo hacen más fácil y qué condiciones lo dificultan?",
+    audio:"escaneo",closingPhrase:"No terminás el programa — lo hacés parte de vos.",estimatedMinutes:10
+  }
+];
+
+const AUDIOS = [
+  {
+    id:'soltar',
+    title:'Soltar el Día',
+    desc:'Una guía de relajación progresiva para ayudarte a soltar las tensiones y preocupaciones del día antes de dormir.',
+    nights:[2,5,8,11,19],
+    file:'audios/soltar-el-dia.mp3',
+    duration:'~15 min'
+  },
+  {
+    id:'respiracion',
+    title:'Respiración 4-6',
+    desc:'Guía de respiración con inhalación de 4 tiempos y exhalación de 6. Activa el sistema parasimpático y reduce el estado de alerta.',
+    nights:[3,6,17],
+    file:'audios/respiracion-4-6.mp3',
+    duration:'~10 min'
+  },
+  {
+    id:'escaneo',
+    title:'Escaneo Corporal',
+    desc:'Recorrido guiado por cada parte del cuerpo para liberar tensión acumulada y preparar el cuerpo para el descanso profundo.',
+    nights:[4,9,18,21],
+    file:'audios/escaneo-corporal.mp3',
+    duration:'~20 min'
+  },
+  {
+    id:'mente',
+    title:'Mente Acelerada',
+    desc:'Audio especial para las noches en que la mente no para. Técnicas de anclaje y externalización para calmar el pensamiento circular.',
+    nights:[10],
+    file:'audios/mente-acelerada.mp3',
+    duration:'~12 min'
+  },
+  {
+    id:'sos',
+    title:'Protocolo SOS',
+    desc:'Para usar cuando te despertás a mitad de la noche y no podés volver a dormir. Guía paso a paso para recuperar la calma.',
+    nights:[12,15],
+    file:'audios/protocolo-sos.mp3',
+    duration:'~8 min'
+  }
+];
+
+const ICONS = {
+  book: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
+  chart: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+  list: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>',
+  layout: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>'
+};
+
+const RECURSOS = [
+  {
+    title:'Diario del Sueño',
+    desc:'Plantilla para registrar tus noches: horas, calidad, energía y notas.',
+    icon:ICONS.book,
+    file:'recursos/diario-del-sueno.pdf'
+  },
+  {
+    title:'Tracker Semanal',
+    desc:'Tabla de seguimiento para las 21 noches. Visualizá tu progreso de un vistazo.',
+    icon:ICONS.chart,
+    file:'recursos/tracker-semanal.pdf'
+  },
+  {
+    title:'Guía de Referencia Rápida',
+    desc:'Resumen de todas las técnicas y hábitos del programa en una sola página.',
+    icon:ICONS.list,
+    file:'recursos/guia-referencia.pdf'
+  },
+  {
+    title:'Plantilla Notion',
+    desc:'Workspace digital completo con diario, tracker y protocolo personal.',
+    icon:ICONS.layout,
+    file:'recursos/plantilla-notion.pdf'
+  }
+];
+
+// ================================================================
+// STATE
+// ================================================================
+const KEY = {
+  currentNight: 'dm_currentNight',
+  completed: 'dm_completedNights',
+  checklists: 'dm_checklists',
+  journals: 'dm_journals'
+};
+
+// Safe storage: falls back to in-memory when localStorage is blocked
+// (private mode, sandboxed preview iframes, etc.) so rendering never breaks.
+const memStore = {};
+const storage = {
+  getItem(k) {
+    try { return localStorage.getItem(k); }
+    catch (e) { return (k in memStore) ? memStore[k] : null; }
+  },
+  setItem(k, v) {
+    try { localStorage.setItem(k, v); }
+    catch (e) { memStore[k] = String(v); }
+  },
+  removeItem(k) {
+    try { localStorage.removeItem(k); }
+    catch (e) { delete memStore[k]; }
+  }
+};
+
+function safeParse(raw, fallback) {
+  if (raw == null) return fallback;
+  try { return JSON.parse(raw); } catch (e) { return fallback; }
+}
+
+function getState() {
+  return {
+    currentNight: parseInt(storage.getItem(KEY.currentNight) || '1', 10) || 1,
+    completed: safeParse(storage.getItem(KEY.completed), []),
+    checklists: safeParse(storage.getItem(KEY.checklists), {}),
+    journals: safeParse(storage.getItem(KEY.journals), {})
+  };
+}
+
+function resetProgress() {
+  Object.values(KEY).forEach(k => storage.removeItem(k));
+  navigate('home');
+}
+
+// ================================================================
+// NAVIGATION
+// ================================================================
+let currentScreen = 'home';
+let currentNightIndex = null;
+let currentTab = 'leccion';
+
+// ================================================================
+// INSTALL MODAL
+// ================================================================
+function showInstallModal() {
+  document.getElementById('install-modal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeInstallModal() {
+  document.getElementById('install-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+// ================================================================
+// NAVIGATION
+// ================================================================
+function navigate(screen, nightIndex) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  // Update both bottom-nav and sidebar-nav buttons
+  document.querySelectorAll('.nav-btn, .sidebar-nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + screen).classList.add('active');
+  document.querySelectorAll(`[data-nav="${screen}"]`).forEach(b => b.classList.add('active'));
+  currentScreen = screen;
+
+  if (screen === 'night' && nightIndex !== undefined) {
+    currentNightIndex = nightIndex;
+    currentTab = 'leccion';
+    renderNightDetail(nightIndex);
+  } else if (screen === 'home') {
+    renderHome();
+  } else if (screen === 'programa') {
+    renderPrograma();
+  } else if (screen === 'audios') {
+    renderAudios();
+  } else if (screen === 'recursos') {
+    renderRecursos();
+  }
+
+  window.scrollTo(0, 0);
+}
+
+// ================================================================
+// STARS
+// ================================================================
+function generateStars() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 40; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    const size = Math.random() * 2 + 1;
+    star.style.cssText = `
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      width:${size}px; height:${size}px;
+      --d:${(Math.random()*3+2).toFixed(1)}s;
+      animation-delay:${(Math.random()*4).toFixed(1)}s;
+    `;
+    container.appendChild(star);
+  }
+}
+
+// ================================================================
+// HOME
+// ================================================================
+function renderHome() {
+  const st = getState();
+  const { currentNight, completed } = st;
+  const night = PROGRAM[currentNight - 1];
+  const completedCount = completed.length;
+  const progress = Math.round((completedCount / 21) * 100);
+  const isAllDone = completedCount === 21;
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Buenos días' : hour < 19 ? 'Buenas tardes' : 'Buenas noches';
+
+  const weekNights = completed.filter(n => {
+    const stored = storage.getItem('dm_date_' + n);
+    if (!stored) return false;
+    const then = new Date(stored);
+    const now = new Date();
+    const diff = (now - then) / (1000 * 60 * 60 * 24);
+    return diff <= 7;
+  }).length;
+
+  const el = document.getElementById('screen-home');
+
+  if (isAllDone) {
+    el.innerHTML = `
+      <div style="text-align:center;padding:40px 0;">
+        <div style="font-size:48px;margin-bottom:16px;">✦</div>
+        <div class="greeting-main" style="margin-bottom:8px;">Completaste el programa</div>
+        <p style="color:var(--muted);font-size:14px;line-height:1.7;margin-bottom:24px;">
+          21 noches de trabajo consciente. Llevás tus hábitos de sueño a otro nivel.
+        </p>
+        <div class="progress-bar-wrapper">
+          <div class="progress-row"><span>Progreso total</span><span>21 / 21</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-box-num">21</div><div class="stat-box-label">Completadas</div></div>
+        <div class="stat-box"><div class="stat-box-num">100%</div><div class="stat-box-label">Progreso</div></div>
+        <div class="stat-box"><div class="stat-box-num">${weekNights}</div><div class="stat-box-label">Esta semana</div></div>
+      </div>
+    `;
+    return;
+  }
+
+  el.innerHTML = `
+    <p class="greeting-sub">${greeting}</p>
+    <h1 class="greeting-main">Tu noche de hoy</h1>
+
+    <div class="install-banner" id="install-banner">
+      <div class="install-banner-text">
+        <strong>Instalá la app</strong>
+        Accedé desde tu pantalla de inicio, sin el navegador.
+      </div>
+      <button class="install-banner-btn" onclick="showInstallModal()">Cómo instalar</button>
+    </div>
+
+    <div class="progress-bar-wrapper">
+      <div class="progress-row">
+        <span>Tu progreso</span>
+        <span>${completedCount} de 21</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:${progress}%"></div>
+      </div>
+    </div>
+
+    <div class="current-night-card" onclick="openNight(${currentNight - 1})">
+      <div class="cnc-label">Noche ${currentNight} de 21</div>
+      <div class="cnc-night-num">${currentNight}</div>
+      <div class="cnc-title">${night.title}</div>
+      <div class="cnc-meta">
+        <span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--muted)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+          ${night.estimatedMinutes} min
+        </span>
+        ${night.audio ? `<span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="var(--gold)"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+          <span style="color:var(--gold)">Audio incluido</span>
+        </span>` : ''}
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <button class="btn-gold" onclick="event.stopPropagation();openNight(${currentNight - 1})">Comenzar noche</button>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--muted)"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-box-num">${completedCount}</div>
+        <div class="stat-box-label">Completadas</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-box-num">${progress}%</div>
+        <div class="stat-box-label">Progreso</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-box-num">${weekNights}</div>
+        <div class="stat-box-label">Esta semana</div>
+      </div>
+    </div>
+
+    ${completedCount > 0 ? `
+    <div style="margin-top:8px;">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:12px;">Noches anteriores</p>
+      ${PROGRAM.slice(0, currentNight - 1).reverse().slice(0,3).map(n => `
+        <div class="night-row" onclick="openNight(${n.night - 1})">
+          <div class="nr-badge done">✓</div>
+          <div class="nr-content">
+            <div class="nr-title">${n.title}</div>
+            <div class="nr-status">Noche ${n.night} · Completada</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--muted)"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+        </div>
+      `).join('')}
+    </div>
+    ` : ''}
+  `;
+}
+
+// ================================================================
+// PROGRAMA
+// ================================================================
+function renderPrograma() {
+  const { currentNight, completed } = getState();
+  const el = document.getElementById('screen-programa');
+
+  el.innerHTML = `
+    <p class="screen-title">Las 21 Noches</p>
+    <div class="nights-grid">
+    ${PROGRAM.map((night, i) => {
+      const isDone = completed.includes(night.night);
+      const isCurrent = night.night === currentNight;
+      const isLocked = !isDone && !isCurrent;
+      const cls = isDone ? '' : isCurrent ? 'is-current' : 'is-locked';
+      const badgeCls = isDone ? 'done' : isCurrent ? 'current' : '';
+      const badgeContent = isDone ? '✓' : isCurrent ? night.night : night.night;
+      const statusText = isDone ? 'Completada' : isCurrent ? 'Tu noche de hoy' : 'Pendiente';
+      const statusCls = isCurrent ? 'gold' : '';
+      return `
+        <div class="night-row ${cls}" onclick="${isLocked ? `showToast('Completá la noche ${currentNight} para desbloquear esta')` : `openNight(${i})`}">
+          <div class="nr-badge ${badgeCls}">${badgeContent}</div>
+          <div class="nr-content">
+            <div class="nr-title">${night.title}</div>
+            <div class="nr-status ${statusCls}">${statusText} · ${night.estimatedMinutes} min</div>
+          </div>
+          ${isLocked
+            ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="var(--muted)"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/></svg>`
+            : `<svg width="16" height="16" viewBox="0 0 24 24" fill="var(--muted)"><path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>`
+          }
+        </div>
+      `;
+    }).join('')}
+    </div>
+  `;
+}
+
+// ================================================================
+// NIGHT DETAIL
+// ================================================================
+function openNight(index) {
+  navigate('night', index);
+}
+
+function renderNightDetail(index) {
+  const night = PROGRAM[index];
+  const st = getState();
+  const isDone = st.completed.includes(night.night);
+  const isCurrent = night.night === st.currentNight;
+  const checks = st.checklists[night.night] || new Array(night.checklist.length).fill(false);
+  const journal = st.journals[night.night] || '';
+  const checkedCount = checks.filter(Boolean).length;
+  const audioData = night.audio ? AUDIOS.find(a => a.id === night.audio) : null;
+
+  const el = document.getElementById('screen-night');
+
+  const lessonParagraphs = night.lesson.split('\n\n').map(p => `<p>${p}</p>`).join('');
+
+  el.innerHTML = `
+    <div class="nd-header">
+      <button class="back-btn" onclick="navigate('${isCurrent || isDone ? 'home' : 'programa'}')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/></svg>
+        Volver
+      </button>
+    </div>
+
+    <div class="nd-intro">
+      <div class="nd-night-label">Noche ${night.night} de 21</div>
+      <h1 class="nd-title">${night.title}</h1>
+      <div class="nd-objective">${night.objective}</div>
+      <div class="nd-chips">
+        <div class="chip">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z"/></svg>
+          ${night.estimatedMinutes} minutos
+        </div>
+        ${audioData ? `<div class="chip gold">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+          ${audioData.title}
+        </div>` : ''}
+        ${isDone ? `<div class="chip gold">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+          Completada
+        </div>` : ''}
+      </div>
+    </div>
+
+    <div class="tabs-bar" id="tabs-bar">
+      <button class="tab-btn active" onclick="switchTab('leccion')">Lección</button>
+      <button class="tab-btn" onclick="switchTab('accion')">Acción</button>
+      <button class="tab-btn" onclick="switchTab('checklist')">Checklist (${checkedCount}/${night.checklist.length})</button>
+      <button class="tab-btn" onclick="switchTab('diario')">Diario</button>
+    </div>
+
+    <div id="tab-leccion" class="tab-panel active">
+      <div class="lesson-body">${lessonParagraphs}</div>
+      <div class="closing-box">
+        <div class="closing-quote">"${night.closingPhrase}"</div>
+      </div>
+    </div>
+
+    <div id="tab-accion" class="tab-panel">
+      <div class="action-box">
+        <div class="action-box-title">Tu acción de esta noche</div>
+        <div class="action-box-text">${night.action}</div>
+      </div>
+      ${audioData ? `
+      <div style="margin-top:20px;">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.8px;">Audio recomendado</p>
+        <div class="audio-card" style="margin-bottom:0;">
+          <div class="audio-card-header">
+            <div class="audio-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="var(--gold)"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+            </div>
+            <div>
+              <div class="audio-name">${audioData.title}</div>
+              <div class="audio-nights-label">${audioData.duration}</div>
+            </div>
+          </div>
+          <audio controls class="audio-player" src="${audioData.file}">Tu navegador no soporta audio.</audio>
+        </div>
+      </div>
+      ` : ''}
+    </div>
+
+    <div id="tab-checklist" class="tab-panel">
+      <div class="checklist-progress-row">
+        <span>Items completados</span>
+        <span id="cl-count-label">${checkedCount} / ${night.checklist.length}</span>
+      </div>
+      <div id="checklist-container">
+        ${night.checklist.map((item, i) => `
+          <div class="cl-item" onclick="toggleCheck(${index}, ${i})">
+            <div class="cl-circle ${checks[i] ? 'done' : ''}" id="cl-circle-${i}">
+              ${checks[i] ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="var(--navy)"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>` : ''}
+            </div>
+            <div class="cl-text ${checks[i] ? 'done' : ''}" id="cl-text-${i}">${item}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div id="tab-diario" class="tab-panel">
+      <div class="journal-prompt-text">${night.journalPrompt}</div>
+      <textarea class="journal-input" id="journal-textarea" placeholder="Escribe aquí tus reflexiones..." rows="6">${journal}</textarea>
+      <button class="btn-outline-gold" onclick="saveJournal(${night.night})">Guardar reflexión</button>
+    </div>
+
+    ${!isDone && isCurrent ? `
+    <div class="complete-bar">
+      <button class="btn-complete" onclick="completeNight(${night.night})">
+        Marcar noche ${night.night} como completada
+      </button>
+    </div>
+    ` : isDone ? `
+    <div class="complete-bar">
+      <div class="completed-badge">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="var(--gold)"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        Noche completada
+      </div>
+    </div>
+    ` : ''}
+  `;
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const panel = document.getElementById('tab-' + tab);
+  if (panel) panel.classList.add('active');
+  const tabs = document.querySelectorAll('.tab-btn');
+  const tabNames = ['leccion','accion','checklist','diario'];
+  const idx = tabNames.indexOf(tab);
+  if (tabs[idx]) tabs[idx].classList.add('active');
+}
+
+function toggleCheck(nightIndex, itemIndex) {
+  const night = PROGRAM[nightIndex];
+  const st = getState();
+  const checks = st.checklists[night.night] || new Array(night.checklist.length).fill(false);
+  checks[itemIndex] = !checks[itemIndex];
+  st.checklists[night.night] = checks;
+  storage.setItem(KEY.checklists, JSON.stringify(st.checklists));
+
+  const circle = document.getElementById(`cl-circle-${itemIndex}`);
+  const text = document.getElementById(`cl-text-${itemIndex}`);
+  if (circle) {
+    circle.className = `cl-circle ${checks[itemIndex] ? 'done' : ''}`;
+    circle.innerHTML = checks[itemIndex] ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="var(--navy)"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>` : '';
+  }
+  if (text) {
+    text.className = `cl-text ${checks[itemIndex] ? 'done' : ''}`;
+  }
+  const count = checks.filter(Boolean).length;
+  const label = document.getElementById('cl-count-label');
+  if (label) label.textContent = `${count} / ${night.checklist.length}`;
+
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  if (tabBtns[2]) tabBtns[2].textContent = `Checklist (${count}/${night.checklist.length})`;
+}
+
+function saveJournal(nightNum) {
+  const textarea = document.getElementById('journal-textarea');
+  if (!textarea) return;
+  const st = getState();
+  st.journals[nightNum] = textarea.value;
+  storage.setItem(KEY.journals, JSON.stringify(st.journals));
+  showToast('Reflexión guardada');
+}
+
+function completeNight(nightNum) {
+  const st = getState();
+  if (!st.completed.includes(nightNum)) {
+    st.completed.push(nightNum);
+    storage.setItem(KEY.completed, JSON.stringify(st.completed));
+    storage.setItem('dm_date_' + nightNum, new Date().toISOString());
+  }
+  if (st.currentNight === nightNum && nightNum < 21) {
+    const nextNight = nightNum + 1;
+    storage.setItem(KEY.currentNight, nextNight.toString());
+  }
+  showToast(`Noche ${nightNum} completada`);
+  setTimeout(() => navigate('home'), 800);
+}
+
+// ================================================================
+// AUDIOS
+// ================================================================
+function renderAudios() {
+  const el = document.getElementById('screen-audios');
+  el.innerHTML = `
+    <p class="screen-title">Audios del Programa</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;">
+      Cinco audios guiados para distintos momentos de tu práctica nocturna.
+      Añadí los archivos MP3 a la carpeta <code style="color:var(--gold)">audios/</code> para reproducirlos.
+    </p>
+    ${AUDIOS.map(audio => `
+      <div class="audio-card">
+        <div class="audio-card-header">
+          <div class="audio-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="var(--gold)"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z"/></svg>
+          </div>
+          <div>
+            <div class="audio-name">${audio.title}</div>
+            <div class="audio-nights-label">Duración: ${audio.duration} · Noches: ${audio.nights.join(', ')}</div>
+          </div>
+        </div>
+        <p class="audio-desc">${audio.desc}</p>
+        <audio controls src="${audio.file}" preload="none">
+          Tu navegador no soporta reproducción de audio.
+        </audio>
+      </div>
+    `).join('')}
+  `;
+}
+
+// ================================================================
+// RECURSOS
+// ================================================================
+function renderRecursos() {
+  const el = document.getElementById('screen-recursos');
+  el.innerHTML = `
+    <p class="screen-title">Recursos</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;">
+      Materiales complementarios para apoyar tu práctica durante las 21 noches.
+    </p>
+    ${RECURSOS.map(r => `
+      <a class="resource-card" href="${r.file}" target="_blank" rel="noopener">
+        <div class="resource-icon">${r.icon}</div>
+        <div>
+          <div class="resource-name">${r.title}</div>
+          <div class="resource-desc">${r.desc}</div>
+        </div>
+      </a>
+    `).join('')}
+
+    <div class="hotmart-cta">
+      <p>¿Aún no tenés acceso al programa completo? Adquirilo en Hotmart y accedé a todos los recursos.</p>
+      <a href="https://pay.hotmart.com/J105937782Y" target="_blank">Adquirir el programa</a>
+    </div>
+  `;
+}
+
+// ================================================================
+// TOAST
+// ================================================================
+let toastTimeout;
+function showToast(msg) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  clearTimeout(toastTimeout);
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  toastTimeout = setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.3s'; setTimeout(() => toast.remove(), 300); }, 2200);
+}
+
+// ================================================================
+// INIT
+// ================================================================
+try {
+  generateStars();
+  renderHome();
+} catch (e) {
+  document.getElementById('screen-home').innerHTML =
+    '<p style="color:var(--muted);padding:40px 0;text-align:center;line-height:1.7;">' +
+    'No pudimos cargar tu progreso en este momento. Recargá la página para reintentar.</p>';
+  console.error('Init error:', e);
+}
+</script>
+</body>
+</html>
